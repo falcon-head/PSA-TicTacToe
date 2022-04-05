@@ -1,2 +1,5 @@
-# PSA-TicTacToe
-Final project for Program Structure & Algorithm
+# TicTacToe
+
+## Team Member
+Shrikrishna Joisa
+Arjun Raja
