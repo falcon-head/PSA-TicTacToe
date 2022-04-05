@@ -1,5 +1,6 @@
 # TicTacToe
 
 ## Team Member
-Shrikrishna Joisa
-Arjun Raja
+
+* Shrikrishna Joisa
+* Arjun Raja
