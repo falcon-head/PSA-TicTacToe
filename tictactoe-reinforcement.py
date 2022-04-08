@@ -8,12 +8,14 @@ import pandas as pd
 import numpy as np
 import logging
 import pickle5 as pickle
-
+from tqdm import tqdm
+import datetime
+import matplotlib.pyplot as plt
 
 # Tic toe using reinforcement learning (Q-learning)
 # We will use feed forward network to approximate the Q-function and use the epsilon-greedy policy to select the next action.
 
-# Episilion-greedy policy uses the prior knowledge and the current state to select the next action.
+# Greedy policy uses the prior knowledge and the current state to select the next action.
 
 """
 Logging:
@@ -34,10 +36,9 @@ THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS
 
 class TicTacToe:
 
-
     """
         Initialize the board, player, winner, ended, latest board state, has the game ended state
-        and initial board valeu is zero, player one move value is 1 and player two move value is 2
+        and initial board valeu is zero, player one move value is 1 and player two move value is -1
     """
 
     def __init__(self, player_one, player_two):
@@ -48,12 +49,14 @@ class TicTacToe:
         self.winner = None
         self.latest_board_state = None
         self.player_symbol = 1   # when the player takes the first move, the symbol is 1
-        # when the player takes the second move, the symbol is 2
+        self.player_one_wins = 0
+        self.player_two_wins = 0
+        self.draws  = 0
 
 
     def play_game(self, number_of_rounds):
-        for i in range(number_of_rounds):
-            while (self.game_has_ended == False) :
+        for i in tqdm(range(number_of_rounds)):
+            while not self.game_has_ended:
                 # Player one moves
                 # Get the available position, based on the available position, select the moves with the coorect player symbol
                 # update the state of the board with the selected move
@@ -62,14 +65,15 @@ class TicTacToe:
                 position = self.available_position()
                 logging.info("The available positions are" + str(position))
                 player_one_choose_move = self.player_one.choose_move(position, self.board, self.player_symbol)
+                logging.info("Player one choose the move" + str(player_one_choose_move))
                 self.update_board_state(player_one_choose_move)
                 new_board_state = self.get_latest_board_values()
+                print(new_board_state)
                 self.player_one.add_state(new_board_state)
-
                 # Check if the game has ended or not
                 # award the reward to the agent
                 # reset the player states and board state if it's a win or a draw
-                # if the game has ended, then break the loop
+                # if the game has ended, break the loop
                 win = self.check_win()
                 if win is not None:
                     self.award_reward()
@@ -77,7 +81,6 @@ class TicTacToe:
                     self.player_two.reset_state()
                     self.board_reset()
                     break
-
                 else:
                     # Check if the game has ended or not
                     # award the reward to the agent
@@ -86,18 +89,23 @@ class TicTacToe:
                     position = self.available_position()
                     logging.info("The available positions are" + str(position))
                     player_two_choose_move = self.player_two.choose_move(position, self.board, self.player_symbol)
+                    logging.info("Player two choose the move" + str(player_two_choose_move))
                     self.update_board_state(player_two_choose_move)
                     new_board_state = self.get_latest_board_values()
                     self.player_two.add_state(new_board_state)
 
                     win = self.check_win()
+                    print(str(win))
                     if win is not None:
                         self.award_reward()
                         self.player_one.reset_state()
                         self.player_two.reset_state()
                         self.board_reset()
                         break
-        self.player_one.save_model()
+        print(self.player_one_wins)
+        print(self.player_two_wins)
+        print(self.draws)
+
 
     """
     Check for the available position in the board and append it to position
@@ -111,7 +119,7 @@ class TicTacToe:
         for i in range(TOTAL_NUMBER_OF_ROWS):
             for k in range(TOTAL_NUMBER_OF_COLUMNS):
                 if self.board[i, k] == 0:
-                    position.append([i, k])
+                    position.append((i, k))
         return position
 
 
@@ -122,7 +130,10 @@ class TicTacToe:
     """
     def update_board_state(self, position):
         self.board[position] = self.player_symbol
-        self.player_symbol = -1 if self.player_symbol == 1 else 1
+        if(self.player_symbol == 1):
+            self.player_symbol = -1
+        else:
+            self.player_symbol = 1
 
     """
     Get the latest board value
@@ -144,11 +155,15 @@ class TicTacToe:
             # Player one row sum
             if sum(self.board[i, :]) == 3:
                 self.game_has_ended = True
+                self.player_one_wins += 1
+                logging.info("Player one has won the match")
                 return 1
 
             # Player two row sum
             if sum(self.board[i, :]) == -3:
                 self.game_has_ended = True
+                self.player_two_wins += 1
+                logging.info("Player two has won the match")
                 return -1
 
         # Check for the column sum
@@ -156,11 +171,15 @@ class TicTacToe:
             # Player one column sum
             if sum(self.board[:, j]) == 3:
                 self.game_has_ended = True
+                self.player_one_wins += 1
+                logging.info("Player one has won the match")
                 return 1
 
             # Player two column sum
             if sum(self.board[:, j]) == -3:
                 self.game_has_ended = True
+                self.player_two_wins += 1
+                logging.info("Player two has won the match")
                 return -1
 
         # Check for the diagonal sum
@@ -174,12 +193,19 @@ class TicTacToe:
         if(diagonal_sum == 3):
             self.game_has_ended = True
             if diagonal_one_sum == 3 or diagonal_two_sum == 3:
+                logging.info("Player one has won the match")
+                self.player_one_wins += 1
                 return 1
             else:
+                logging.info("Player one has won the match")
+                self.player_two_wins += 1
                 return -1
 
-        if (self.available_position() == []):
+        # No position remaining, then it's a tie
+        if len(self.available_position()) == 0:
             self.game_has_ended = True
+            self.draws += 1
+            logging.info("Match is a tie")
             return 0
 
         self.game_has_ended = False
@@ -192,12 +218,15 @@ class TicTacToe:
     def award_reward(self):
         result = self.check_win()
         if result == 1:
+            logging.info("Rewarded player one with 1")
             self.player_one.reward(1)
             self.player_two.reward(0)
         elif result == -1:
+            logging.info("Rewarded player two with 1")
             self.player_one.reward(0)
             self.player_two.reward(1)
         else:
+            logging.info("Rewarded both player with 0.5")
             self.player_one.reward(0.5)
             self.player_one.reward(0.5)
 
@@ -209,7 +238,7 @@ class TicTacToe:
         self.game_has_ended = False
         self.player_symbol = 1
         self.latest_board_state = None
-
+        logging.info("The board has been reset")
 
 """
 This class includes the trainng and testing methods for the Q-learning algorithm
@@ -270,7 +299,7 @@ class PlayerTraining:
     Get the latest board value
     """
     def get_latest_board_values(self, board):
-        latest_board = str(board.reshape(THE_BOARD))
+        latest_board = str(board.reshape(TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS))
         return latest_board
 
     """
@@ -296,21 +325,23 @@ class PlayerTraining:
         self.position_state = []
 
     """
-    Save the model using pickle for the player to integrate with the  other apps
+    Save the model using pickle for the player to integrate with the other apps
     """
     def save_model(self):
-        model_pickle_file = open("model_" + str(self.player_name), "wb")
+        model_pickle_file = open("model_" + str(self.player_name) + "_" + str(datetime.datetime.now()), "wb")
         pickle.dump(self.position_value, model_pickle_file)
         model_pickle_file.close()
 
 # Program execution
 if __name__ == "__main__":
     # Train the player to play with each other
-    player_one = PlayerTraining("playerOne")
-    player_two = PlayerTraining("playerTwo")
+    player_one = PlayerTraining("player_one")
+    player_two = PlayerTraining("player_two")
 
     # Train the players to player to play with each other
     ready_to_play = TicTacToe(player_one, player_two)
-    print("training")
+    logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(60000)
+    ready_to_play.play_game(5000)
+    # Save the model
+    player_one.save_model()
