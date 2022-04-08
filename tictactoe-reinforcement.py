@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 
 # Tic toe using reinforcement learning (Q-learning)
 # We will use feed forward network to approximate the Q-function and use the epsilon-greedy policy to select the next action.
-
 # Greedy policy uses the prior knowledge and the current state to select the next action.
 
 """
@@ -32,7 +31,6 @@ logging.basicConfig(filename='tictactoe-reinforcement.log', level=logging.INFO, 
 TOTAL_NUMBER_OF_ROWS = 3
 TOTAL_NUMBER_OF_COLUMNS = 3
 THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS
-
 
 class TicTacToe:
 
@@ -53,7 +51,6 @@ class TicTacToe:
         self.player_two_wins = 0
         self.draws  = 0
 
-
     def play_game(self, number_of_rounds):
         for i in tqdm(range(number_of_rounds)):
             while not self.game_has_ended:
@@ -68,7 +65,7 @@ class TicTacToe:
                 logging.info("Player one choose the move" + str(player_one_choose_move))
                 self.update_board_state(player_one_choose_move)
                 new_board_state = self.get_latest_board_values()
-                print(new_board_state)
+                logging.info("The board values" + str(new_board_state))
                 self.player_one.add_state(new_board_state)
                 # Check if the game has ended or not
                 # award the reward to the agent
@@ -95,7 +92,6 @@ class TicTacToe:
                     self.player_two.add_state(new_board_state)
 
                     win = self.check_win()
-                    print(str(win))
                     if win is not None:
                         self.award_reward()
                         self.player_one.reset_state()
@@ -105,7 +101,6 @@ class TicTacToe:
         print(self.player_one_wins)
         print(self.player_two_wins)
         print(self.draws)
-
 
     """
     Check for the available position in the board and append it to position
