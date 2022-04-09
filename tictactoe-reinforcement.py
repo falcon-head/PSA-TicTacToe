@@ -1,15 +1,14 @@
 """
 Author: Shrikrishna Joisa
 Creted on: 2022-06-04
-Last Updated on: 2022-06-04
-
+Last Updated on: 2022-08-04
 """
-
 
 import pandas as pd
 import numpy as np
 import logging
 import pickle5 as pickle
+
 
 # Tic toe using reinforcement learning (Q-learning)
 # We will use feed forward network to approximate the Q-function and use the epsilon-greedy policy to select the next action.
@@ -56,22 +55,49 @@ class TicTacToe:
         for i in range(number_of_rounds):
             while (self.game_has_ended == False) :
                 # Player one moves
+                # Get the available position, based on the available position, select the moves with the coorect player symbol
+                # update the state of the board with the selected move
+                # Add the state to the list of states values
+                # Check whether the user has won the game or not based on that reward the agent
                 position = self.available_position()
                 logging.info("The available positions are" + str(position))
                 player_one_choose_move = self.player_one.choose_move(position, self.board, self.player_symbol)
-                self.updateBoardState(player_one_choose_move)
+                self.update_board_state(player_one_choose_move)
                 new_board_state = self.get_latest_board_values()
                 self.player_one.add_state(new_board_state)
-                print(self.player_one.add_state(new_board_state))
 
                 # Check if the game has ended or not
+                # award the reward to the agent
+                # reset the player states and board state if it's a win or a draw
+                # if the game has ended, then break the loop
                 win = self.check_win()
                 if win is not None:
                     self.award_reward()
                     self.player_one.reset_state()
                     self.player_two.reset_state()
-                    self.reset()
+                    self.board_reset()
                     break
+
+                else:
+                    # Check if the game has ended or not
+                    # award the reward to the agent
+                    # reset the player states and board state if it's a win or a draw
+                    # if the game has ended, then break the loop
+                    position = self.available_position()
+                    logging.info("The available positions are" + str(position))
+                    player_two_choose_move = self.player_two.choose_move(position, self.board, self.player_symbol)
+                    self.update_board_state(player_two_choose_move)
+                    new_board_state = self.get_latest_board_values()
+                    self.player_two.add_state(new_board_state)
+
+                    win = self.check_win()
+                    if win is not None:
+                        self.award_reward()
+                        self.player_one.reset_state()
+                        self.player_two.reset_state()
+                        self.board_reset()
+                        break
+        self.player_one.save_model()
 
     """
     Check for the available position in the board and append it to position
@@ -94,7 +120,7 @@ class TicTacToe:
     If player one is playing his symbol is 1
     If player two is playing his symbol is 2
     """
-    def updateBoardState(self, position):
+    def update_board_state(self, position):
         self.board[position] = self.player_symbol
         self.player_symbol = -1 if self.player_symbol == 1 else 1
 
@@ -159,6 +185,32 @@ class TicTacToe:
         self.game_has_ended = False
         return None
 
+    # agent reward mechanism by backpropagation
+    # if the player one winsm, then reward the player one with 1 and player two with 0
+    # if the player two wins, then reward the player two with 1  and player one with 0
+    # if the game is a draw, then reward both player with 0.5
+    def award_reward(self):
+        result = self.check_win()
+        if result == 1:
+            self.player_one.reward(1)
+            self.player_two.reward(0)
+        elif result == -1:
+            self.player_one.reward(0)
+            self.player_two.reward(1)
+        else:
+            self.player_one.reward(0.5)
+            self.player_one.reward(0.5)
+
+    """
+        Reset the entire board state, symbol & the latest_board_state
+    """
+    def board_reset(self):
+        self.board = np.zeros((TOTAL_NUMBER_OF_ROWS, TOTAL_NUMBER_OF_COLUMNS))
+        self.game_has_ended = False
+        self.player_symbol = 1
+        self.latest_board_state = None
+
+
 """
 This class includes the trainng and testing methods for the Q-learning algorithm
 
@@ -197,14 +249,8 @@ class PlayerTraining:
                 next_board = current_board_state.copy()
                 next_board[p] = symbol
                 next_board_state = self.get_latest_board_values(next_board)
-                # value = 0 if self.position_value.get(next_board_state) is None else self.position_value.get(next_board_state)
-                if self.position_value.get(next_board_state) is None:
-                    value = 0
-                else :
-                    self.position_value(next_board_state)
+                value = 0 if self.position_value.get(next_board_state) is None else self.position_value.get(next_board_state)
                 if value >= max_value:
-                    print(value)
-                    print(max_value)
                     max_value = value
                     choosen_move = p
         logging.info("Choosen move from the computer/ player one" + str(choosen_move))
@@ -233,6 +279,30 @@ class PlayerTraining:
     def add_state(self, state):
         self.position_state.append(state)
 
+    """
+    backpropagate and update the state in the Q-learning algorithm
+    """
+    def reward(self, reward):
+        for state in reversed(self.position_state):
+            if self.position_value.get(state) is None:
+                self.position_value[state] = 0
+            self.position_value[state] += self.learning_rate * (self.discount_rate + reward - self.position_value[state])
+            reward = self.position_value[state]
+
+    """
+    reset the states of the player and board
+    """
+    def reset_state(self):
+        self.position_state = []
+
+    """
+    Save the model using pickle for the player to integrate with the  other apps
+    """
+    def save_model(self):
+        model_pickle_file = open("model_" + str(self.player_name), "wb")
+        pickle.dump(self.position_value, model_pickle_file)
+        model_pickle_file.close()
+
 # Program execution
 if __name__ == "__main__":
     # Train the player to play with each other
@@ -241,6 +311,6 @@ if __name__ == "__main__":
 
     # Train the players to player to play with each other
     ready_to_play = TicTacToe(player_one, player_two)
-
+    print("training")
     # Play the game
-    ready_to_play.play_game(1)
+    ready_to_play.play_game(60000)
