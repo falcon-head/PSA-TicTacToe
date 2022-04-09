@@ -6,8 +6,6 @@ Last Updated on: 2022-06-04
 """
 
 
-from tokenize import String
-from turtle import position
 import pandas as pd
 import numpy as np
 import logging
@@ -50,8 +48,8 @@ class TicTacToe:
         self.game_has_ended = False
         self.winner = None
         self.latest_board_state = None
-        self.player_one_symbol = 1   # when the player takes the first move, the symbol is 1
-        self.player_two_symbol = 2       # when the player takes the second move, the symbol is 2
+        self.player_symbol = 1   # when the player takes the first move, the symbol is 1
+        # when the player takes the second move, the symbol is 2
 
 
     def play_game(self, number_of_rounds):
@@ -60,9 +58,25 @@ class TicTacToe:
                 # Player one moves
                 position = self.available_position()
                 logging.info("The available positions are" + str(position))
-                player_one_choose_move = self.player_one.choose_move(position, self.board, self.player_one_symbol)
-                self.game_has_ended = True
+                player_one_choose_move = self.player_one.choose_move(position, self.board, self.player_symbol)
+                self.updateBoardState(player_one_choose_move)
+                new_board_state = self.get_latest_board_values()
+                self.player_one.add_state(new_board_state)
+                print(self.player_one.add_state(new_board_state))
 
+                # Check if the game has ended or not
+                win = self.check_win()
+                if win is not None:
+                    self.award_reward()
+                    self.player_one.reset_state()
+                    self.player_two.reset_state()
+                    self.reset()
+                    break
+
+    """
+    Check for the available position in the board and append it to position
+    returns : position matrix
+    """
 
     def available_position(self):
         # we need to store the availanle positon in the form of matrix
@@ -75,6 +89,75 @@ class TicTacToe:
         return position
 
 
+    """
+    Update the board position based on the player move
+    If player one is playing his symbol is 1
+    If player two is playing his symbol is 2
+    """
+    def updateBoardState(self, position):
+        self.board[position] = self.player_symbol
+        self.player_symbol = -1 if self.player_symbol == 1 else 1
+
+    """
+    Get the latest board value
+    """
+    def get_latest_board_values(self):
+        latest_board = str(self.board.reshape(THE_BOARD))
+        return latest_board
+
+    """
+    Function which is used to check the winning condition of the tictactoe
+    Here we will consider row winning condition, if the player one row sum is == 3, then the player one has won the mtach
+    if the player two row sum is == -3, then the player two has won the match
+    Add diagonal condition as well to check for the win, If the diagonal is complete with single symbol then the player wills secure the win
+    Along with the tie condition as well
+    """
+    def check_win(self):
+        # Check for the row sum at first
+        for i in range(TOTAL_NUMBER_OF_ROWS):
+            # Player one row sum
+            if sum(self.board[i, :]) == 3:
+                self.game_has_ended = True
+                return 1
+
+            # Player two row sum
+            if sum(self.board[i, :]) == -3:
+                self.game_has_ended = True
+                return -1
+
+        # Check for the column sum
+        for j in range(TOTAL_NUMBER_OF_COLUMNS):
+            # Player one column sum
+            if sum(self.board[:, j]) == 3:
+                self.game_has_ended = True
+                return 1
+
+            # Player two column sum
+            if sum(self.board[:, j]) == -3:
+                self.game_has_ended = True
+                return -1
+
+        # Check for the diagonal sum
+        diagonal_one_sum = sum([self.board[i,i] for i in range(TOTAL_NUMBER_OF_COLUMNS)])
+        diagonal_two_sum = sum([self.board[i, TOTAL_NUMBER_OF_COLUMNS - i - 1] for i in range(TOTAL_NUMBER_OF_COLUMNS)])
+        diagonal_sum = max(abs(diagonal_one_sum), abs(diagonal_two_sum))
+        # Calculate the two diagonal sum
+        # once you calculate check if the diagonal sum is 3 or -3
+        # if the diagonal sum is 3 then the player one has won the mtach else palayer two has won the match
+
+        if(diagonal_sum == 3):
+            self.game_has_ended = True
+            if diagonal_one_sum == 3 or diagonal_two_sum == 3:
+                return 1
+            else:
+                return -1
+
+        if (self.available_position() == []):
+            self.game_has_ended = True
+            return 0
+
+        self.game_has_ended = False
+        return None
 
 """
 This class includes the trainng and testing methods for the Q-learning algorithm
@@ -88,7 +171,7 @@ class PlayerTraining:
     """
     def __init__(self, player_identifier):
         self.player_name = player_identifier
-        self.position_taken = []
+        self.position_state = []
         self.learning_rate = 0.3
         self.discount_rate = 0.9
         self.exploratory_move = 0.3  # make a random move to experience all the states present in the game
@@ -98,6 +181,7 @@ class PlayerTraining:
     """
         Uniformly choose a random move, an exploratory move where the player takes the move randomly to go through all the possiblile state
         The data is uniformly distributed with the help of uniform method & compared with the expolatory move
+        returns: move to be choosen
     """
     def choose_move(self, position, current_board_state, symbol):
         # make a random move
@@ -107,18 +191,20 @@ class PlayerTraining:
             id = np.random.choice(len(position))
             choosen_move = position[id]
         else:
-            # make a greedy move to maximize the rewards
+            # choose the move that maximizes to maximize the rewards
             max_value = -999
             for p in position:
                 next_board = current_board_state.copy()
                 next_board[p] = symbol
                 next_board_state = self.get_latest_board_values(next_board)
-                value = 0 if self.position_value.get(next_board_state) is None else self.position_value.get(next_board_state)
-                # if self.position_value.get(next_board_state) is None:
-                #     value = 0
-                # else :
-                #     self.position_value(next_board_state)
+                # value = 0 if self.position_value.get(next_board_state) is None else self.position_value.get(next_board_state)
+                if self.position_value.get(next_board_state) is None:
+                    value = 0
+                else :
+                    self.position_value(next_board_state)
                 if value >= max_value:
+                    print(value)
+                    print(max_value)
                     max_value = value
                     choosen_move = p
         logging.info("Choosen move from the computer/ player one" + str(choosen_move))
@@ -134,9 +220,18 @@ class PlayerTraining:
                     position.append([i, k])
         return position
 
+    """
+    Get the latest board value
+    """
     def get_latest_board_values(self, board):
         latest_board = str(board.reshape(THE_BOARD))
         return latest_board
+
+    """
+    Append a list to a state
+    """
+    def add_state(self, state):
+        self.position_state.append(state)
 
 # Program execution
 if __name__ == "__main__":
