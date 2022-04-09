@@ -12,6 +12,9 @@ class State:
         self.p2 = p2
         self.isEnd = False
         self.boardHash = None
+        self.playerOneWins = 0
+        self.playerTwoWins = 0
+        self.ties = 0
         # init p1 plays first
         self.playerSymbol = 1
 
@@ -24,19 +27,26 @@ class State:
         # row
         for i in range(BOARD_ROWS):
             if sum(self.board[i, :]) == 3:
+                self.playerOneWins +=1
                 self.isEnd = True
                 return 1
+
             if sum(self.board[i, :]) == -3:
+                self.playerTwoWins +=1
                 self.isEnd = True
                 return -1
         # col
         for i in range(BOARD_COLS):
             if sum(self.board[:, i]) == 3:
+                self.playerOneWins +=1
                 self.isEnd = True
                 return 1
+
             if sum(self.board[:, i]) == -3:
+                self.playerTwoWins +=1
                 self.isEnd = True
                 return -1
+
         # diagonal
         diag_sum1 = sum([self.board[i, i] for i in range(BOARD_COLS)])
         diag_sum2 = sum([self.board[i, BOARD_COLS - i - 1] for i in range(BOARD_COLS)])
@@ -44,13 +54,16 @@ class State:
         if diag_sum == 3:
             self.isEnd = True
             if diag_sum1 == 3 or diag_sum2 == 3:
+                self.playerOneWins +=1
                 return 1
             else:
+                self.playerTwoWins +=1
                 return -1
 
         # tie
         # no available positions
         if len(self.availablePositions()) == 0:
+            self.ties += 1
             self.isEnd = True
             return 0
         # not end
@@ -102,6 +115,7 @@ class State:
                 # take action and upate board state
                 self.updateState(p1_action)
                 board_hash = self.getHash()
+                print(board_hash)
                 self.p1.addState(board_hash)
                 # check board status if it is end
 
@@ -132,6 +146,9 @@ class State:
                         self.p2.reset()
                         self.reset()
                         break
+        print(self.playerOneWins)
+        print(self.playerTwoWins)
+        print(self.ties)
 
     # play with human
     def play2(self):
@@ -141,8 +158,7 @@ class State:
             p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
             # take action and upate board state
             self.updateState(p1_action)
-            self.showBoard()
-            # check board status if it is end
+            self.showBoard()            # check board status if it is end
             win = self.winner()
             if win is not None:
                 if win == 1:
@@ -274,4 +290,4 @@ if __name__ == "__main__":
 
     st = State(p1, p2)
     print("training...")
-    st.play(50000)
+    st.play(1)
