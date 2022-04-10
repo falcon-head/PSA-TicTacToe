@@ -1,7 +1,7 @@
 """
 Author: Shrikrishna Joisa
 Creted on: 2022-06-04
-Last Updated on: 2022-08-04
+Last Updated on: 2022-10-04
 """
 
 import pandas as pd
@@ -150,14 +150,12 @@ class TicTacToe:
             # Player one row sum
             if sum(self.board[i, :]) == 3:
                 self.game_has_ended = True
-                self.player_one_wins += 1
                 logging.info("Player one has won the match")
                 return 1
 
             # Player two row sum
             if sum(self.board[i, :]) == -3:
                 self.game_has_ended = True
-                self.player_two_wins += 1
                 logging.info("Player two has won the match")
                 return -1
 
@@ -166,14 +164,12 @@ class TicTacToe:
             # Player one column sum
             if sum(self.board[:, j]) == 3:
                 self.game_has_ended = True
-                self.player_one_wins += 1
                 logging.info("Player one has won the match")
                 return 1
 
             # Player two column sum
             if sum(self.board[:, j]) == -3:
                 self.game_has_ended = True
-                self.player_two_wins += 1
                 logging.info("Player two has won the match")
                 return -1
 
@@ -189,17 +185,14 @@ class TicTacToe:
             self.game_has_ended = True
             if diagonal_one_sum == 3 or diagonal_two_sum == 3:
                 logging.info("Player one has won the match")
-                self.player_one_wins += 1
                 return 1
             else:
                 logging.info("Player one has won the match")
-                self.player_two_wins += 1
                 return -1
 
         # No position remaining, then it's a tie
         if len(self.available_position()) == 0:
             self.game_has_ended = True
-            self.draws += 1
             logging.info("Match is a tie")
             return 0
 
@@ -214,14 +207,17 @@ class TicTacToe:
         result = self.check_win()
         if result == 1:
             logging.info("Rewarded player one with 1")
+            self.player_one_wins +=1
             self.player_one.reward(1)
             self.player_two.reward(0)
         elif result == -1:
             logging.info("Rewarded player two with 1")
+            self.player_two_wins += 1
             self.player_one.reward(0)
             self.player_two.reward(1)
         else:
             logging.info("Rewarded both player with 0.5")
+            self.draws += 1
             self.player_one.reward(0.5)
             self.player_one.reward(0.5)
 
@@ -248,9 +244,9 @@ class PlayerTraining:
     def __init__(self, player_identifier):
         self.player_name = player_identifier
         self.position_state = []
-        self.learning_rate = 0.3
+        self.learning_rate = 0.2
         self.discount_rate = 0.9
-        self.exploratory_move = 0.3  # make a random move to experience all the states present in the game
+        self.exploratory_move = 0.4  # make a random move to experience all the states present in the game
         self.greedy_move = 0.7 # To maximize the rewards
         self.position_value = {} # state position value dictionary
 
@@ -327,6 +323,30 @@ class PlayerTraining:
         pickle.dump(self.position_value, model_pickle_file)
         model_pickle_file.close()
 
+class Human:
+    def __init__(self, name):
+        self.name = name
+
+    def choose_action(self, position):
+        while True:
+            row = int(input("Input your action row: "))
+            col = int(input("Input your action col: "))
+            move = (row, col)
+            if move in position:
+                return move
+
+    # human doesn't need to learn
+    def addState(self, state):
+        pass
+
+    # human is intelligent enough to play this game
+    def reward(self, reward):
+        pass
+
+    # reset state happens automatically
+    def reset_state(self):
+        pass
+
 # Program execution
 if __name__ == "__main__":
     # Train the player to play with each other
@@ -339,4 +359,6 @@ if __name__ == "__main__":
     # Play the game
     ready_to_play.play_game(5000)
     # Save the model
-    player_one.save_model()
+    # player_one.save_model()
+
+
