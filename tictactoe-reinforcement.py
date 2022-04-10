@@ -269,10 +269,12 @@ class PlayerTraining:
                 next_board = current_board_state.copy()
                 next_board[p] = symbol
                 next_board_state = self.get_latest_board_values(next_board)
+                print(self.position_value.get(next_board_state))
                 value = 0 if self.position_value.get(next_board_state) is None else self.position_value.get(next_board_state)
                 if value >= max_value:
                     max_value = value
                     choosen_move = p
+        print(choosen_move)
         logging.info("Choosen move from the computer/ player one" + str(choosen_move))
         return choosen_move
 
@@ -347,6 +349,7 @@ class Human:
     def reset_state(self):
         pass
 
+
 # Program execution
 if __name__ == "__main__":
     # Train the player to play with each other
@@ -357,7 +360,7 @@ if __name__ == "__main__":
     ready_to_play = TicTacToe(player_one, player_two)
     logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(5000)
+    ready_to_play.play_game(10)
     # Save the model
     # player_one.save_model()
 
