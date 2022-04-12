@@ -27,6 +27,7 @@ def choose_move(self, position, current_board_state, symbol):
     # The current board state has the type should be numpy.ndArray: [[0. 0.0]
     #                                                                [1. 0.0]
     #                                                                [0. -1.0]]
+
     if np.random.uniform(0,1) <= 0:
         id = np.random.choice(len(position))
         choosen_move = position[id]
