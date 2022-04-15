@@ -19,9 +19,11 @@ class TestTicTacToe(unittest.TestCase):
         self.assertEqual(tictactoe_reinforcement.PlayerTraining.get_latest_board_values(self, np.array([[0, 0, 0], [0, 0, 0], [0, 1, 0]])), str(np.array([[0, 0, 0], [0, 0, 0], [0, 1, 0]]).reshape(3*3)))
         self.assertEqual(tictactoe_reinforcement.PlayerTraining.get_latest_board_values(self, np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])), str(np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]]).reshape(3*3)))
 
-
 if __name__ == "__main__":
     unittest.main()
+
+
+
 
 
 

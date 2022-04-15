@@ -4,6 +4,7 @@ Creted on: 2022-06-04
 Last Updated on: 2022-12-04
 """
 
+from turtle import pos
 import pandas as pd
 import numpy as np
 import logging
@@ -244,7 +245,7 @@ class PlayerTraining:
     def __init__(self, player_identifier):
         self.player_name = player_identifier
         self.position_state = []
-        self.learning_rate = 0.3
+        self.learning_rate = 0.2
         self.discount_rate = 0.9
         self.exploratory_move = 0.3  # make a random move to experience all the states present in the game
         self.greedy_move = 0.7 # To maximize the rewards
@@ -336,5 +337,3 @@ if __name__ == "__main__":
     ready_to_play.play_game(1)
     # Save the model
     # player_one.save_model()
-
-
