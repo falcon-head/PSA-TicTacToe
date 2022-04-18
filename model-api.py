@@ -1,12 +1,14 @@
 from flask import request
 from flask import Flask
+from flask_cors import CORS
 import pandas as pd
 import numpy as np
 import pickle5 as pickle
 
 
 app = Flask(__name__)
-
+# allows front end to communicate with python
+CORS(app)
 # to store the pickle state
 position_value = {}
 
@@ -57,7 +59,9 @@ def fetch():
     # Get the post values from JSON
     content_from_post_body = request.get_json()
     position = content_from_post_body['position']   #  or content_from_post_body.get('position')
+    print("Soeee", position)
     remaining_position = list(eval(position))
+    
     current_board_state = content_from_post_body['current_board_state']  # content_from_post_body.get('current_board_state')
     current_board_state = np.array(list(eval(current_board_state)))
     symbol = content_from_post_body['symbol']  # content_from_post_body.get('symbol')
