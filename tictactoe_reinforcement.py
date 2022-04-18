@@ -4,8 +4,6 @@ Creted on: 2022-06-04
 Last Updated on: 2022-12-04
 """
 
-from turtle import pos
-import pandas as pd
 import numpy as np
 import logging
 import pickle5 as pickle
