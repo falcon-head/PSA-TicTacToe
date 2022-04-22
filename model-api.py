@@ -96,7 +96,7 @@ def fetch():
     symbol = content_from_post_body['symbol']  # content_from_post_body.get('symbol')
 
     # Handling the position two
-    if (position == 1):
+    if (symbol == 1):
         the_move = choose_move(remaining_position, current_board_state, symbol)
         return the_move
     else:
