@@ -29,7 +29,7 @@ logging.basicConfig(filename='tictactoe-reinforcement.log', level=logging.INFO, 
 # Initialize board values for the game
 TOTAL_NUMBER_OF_ROWS = 3
 TOTAL_NUMBER_OF_COLUMNS = 3
-THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS  
+THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS
 
 class TicTacToe:
 
@@ -45,7 +45,7 @@ class TicTacToe:
         self.game_has_ended = False
         self.winner = None
         self.latest_board_state = None
-        self.player_symbol = 1   # when the player takes the first move, the symbol is 1
+        self.player_symbol = 1  # when the player takes the first move, the symbol is 1
         self.player_one_wins = 0
         self.player_two_wins = 0
         self.draws  = 0
@@ -102,6 +102,9 @@ class TicTacToe:
         print(self.player_one_wins)
         print(self.player_two_wins)
         print(self.draws)
+        self.barGraphList.append(self.player_one_wins)
+        self.barGraphList.append(self.player_two_wins)
+        self.barGraphList.append(self.draws)
         self.plot_bar_graph()
 
     """
@@ -113,25 +116,22 @@ class TicTacToe:
         # create the bar graph figure
         fig = plt.figure(figsize=  (10,5))
         items = ["Player One", "Player Two", "Draws"]
-        print(self.barGraphList)
         plt.bar(items, self.barGraphList)
         plt.xlabel("Players")
         plt.ylabel("Number of Wins")
         plt.title("Win Comparison")
         plt.savefig("win_comparison.png")
 
-    def plot_show_rewards_graph(self):
-        fig = plt.figure(figsize=  (10, 5))
-        plt.plot(PLAYER_GAME_NUMBER, PLAYER_ONE_REWARDS, label = "Player One")
-        plt.plot(PLAYER_GAME_NUMBER, PLAYER_TWO_REWARDS, label = "Player Two")
-        plt.xlabel("Games")
-        plt.ylabel("Rewards")
-        plt.title("Rewards Comparison")
-        plt.legend()
-        plt.savefig("rewards_comparison.png")
-        plt.show()
-
-
+    # def plot_show_rewards_graph(self):
+    #     fig = plt.figure(figsize=  (10, 5))
+    #     plt.plot(PLAYER_GAME_NUMBER, PLAYER_ONE_REWARDS, label = "Player One")
+    #     plt.plot(PLAYER_GAME_NUMBER, PLAYER_TWO_REWARDS, label = "Player Two")
+    #     plt.xlabel("Games")
+    #     plt.ylabel("Rewards")
+    #     plt.title("Rewards Comparison")
+    #     plt.legend()
+    #     plt.savefig("rewards_comparison.png")
+    #     plt.show()
 
     def available_position(self):
         # we need to store the availanle positon in the form of matrix
@@ -236,22 +236,16 @@ class TicTacToe:
             self.player_one_wins +=1
             self.player_one.reward(1)
             self.player_two.reward(0)
-            PLAYER_ONE_REWARDS.append(1)
-            PLAYER_TWO_REWARDS.append(0)
         elif result == -1:
             logging.info("Rewarded player two with 1")
             self.player_two_wins += 1
             self.player_one.reward(0)
             self.player_two.reward(1)
-            PLAYER_ONE_REWARDS.append(0)
-            PLAYER_TWO_REWARDS.append(1)
         else:
             logging.info("Rewarded both player with 0.5")
             self.draws += 1
+            self.player_one.reward(0.1)
             self.player_one.reward(0.5)
-            self.player_one.reward(0.5)
-            PLAYER_ONE_REWARDS.append(0.5)
-            PLAYER_TWO_REWARDS.append(0.5)
 
     """
         Reset the entire board state, symbol & the latest_board_state
@@ -339,6 +333,7 @@ class PlayerTraining:
         for state in reversed(self.position_state):
             if self.position_value.get(state) is None:
                 self.position_value[state] = 0
+            # Q learning formula
             self.position_value[state] += self.learning_rate * (self.discount_rate + reward - self.position_value[state])
             reward = self.position_value[state]
 
@@ -356,6 +351,7 @@ class PlayerTraining:
         pickle.dump(self.position_value, model_pickle_file)
         model_pickle_file.close()
 
+
 # Program execution
 if __name__ == "__main__":
     # Train the player to play with each other
@@ -366,6 +362,6 @@ if __name__ == "__main__":
     ready_to_play = TicTacToe(player_one, player_two)
     logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(500)
+    ready_to_play.play_game(30000)
     # Save the model
-    # player_one.save_model()
+    player_one.save_model()
