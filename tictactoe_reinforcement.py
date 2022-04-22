@@ -29,7 +29,7 @@ logging.basicConfig(filename='tictactoe-reinforcement.log', level=logging.INFO, 
 # Initialize board values for the game
 TOTAL_NUMBER_OF_ROWS = 3
 TOTAL_NUMBER_OF_COLUMNS = 3
-THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS
+THE_BOARD = TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS  
 
 class TicTacToe:
 
@@ -49,6 +49,7 @@ class TicTacToe:
         self.player_one_wins = 0
         self.player_two_wins = 0
         self.draws  = 0
+        self.barGraphList = []
 
     def play_game(self, number_of_rounds):
         for i in tqdm(range(number_of_rounds)):
@@ -97,14 +98,40 @@ class TicTacToe:
                         self.player_two.reset_state()
                         self.board_reset()
                         break
+
         print(self.player_one_wins)
         print(self.player_two_wins)
         print(self.draws)
+        self.plot_bar_graph()
 
     """
     Check for the available position in the board and append it to position
     returns : position matrix
     """
+
+    def plot_bar_graph(self):
+        # create the bar graph figure
+        fig = plt.figure(figsize=  (10,5))
+        items = ["Player One", "Player Two", "Draws"]
+        print(self.barGraphList)
+        plt.bar(items, self.barGraphList)
+        plt.xlabel("Players")
+        plt.ylabel("Number of Wins")
+        plt.title("Win Comparison")
+        plt.savefig("win_comparison.png")
+
+    def plot_show_rewards_graph(self):
+        fig = plt.figure(figsize=  (10, 5))
+        plt.plot(PLAYER_GAME_NUMBER, PLAYER_ONE_REWARDS, label = "Player One")
+        plt.plot(PLAYER_GAME_NUMBER, PLAYER_TWO_REWARDS, label = "Player Two")
+        plt.xlabel("Games")
+        plt.ylabel("Rewards")
+        plt.title("Rewards Comparison")
+        plt.legend()
+        plt.savefig("rewards_comparison.png")
+        plt.show()
+
+
 
     def available_position(self):
         # we need to store the availanle positon in the form of matrix
@@ -209,16 +236,22 @@ class TicTacToe:
             self.player_one_wins +=1
             self.player_one.reward(1)
             self.player_two.reward(0)
+            PLAYER_ONE_REWARDS.append(1)
+            PLAYER_TWO_REWARDS.append(0)
         elif result == -1:
             logging.info("Rewarded player two with 1")
             self.player_two_wins += 1
             self.player_one.reward(0)
             self.player_two.reward(1)
+            PLAYER_ONE_REWARDS.append(0)
+            PLAYER_TWO_REWARDS.append(1)
         else:
             logging.info("Rewarded both player with 0.5")
             self.draws += 1
             self.player_one.reward(0.5)
             self.player_one.reward(0.5)
+            PLAYER_ONE_REWARDS.append(0.5)
+            PLAYER_TWO_REWARDS.append(0.5)
 
     """
         Reset the entire board state, symbol & the latest_board_state
@@ -248,6 +281,7 @@ class PlayerTraining:
         self.exploratory_move = 0.3  # make a random move to experience all the states present in the game
         self.greedy_move = 0.7 # To maximize the rewards
         self.position_value = {} # state position value dictionary
+        self.reward_list = []
 
     """
         Uniformly choose a random move, an exploratory move where the player takes the move randomly to go through all the possiblile state
@@ -332,6 +366,6 @@ if __name__ == "__main__":
     ready_to_play = TicTacToe(player_one, player_two)
     logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(1)
+    ready_to_play.play_game(500)
     # Save the model
     # player_one.save_model()

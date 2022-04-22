@@ -2,6 +2,7 @@ import unittest
 import tictactoe_reinforcement
 import numpy as np
 import pandas as pd
+from mock import Mock
 
 # Only one test case possible in tictactoe_reinforcement.py
 class TestTicTacToe(unittest.TestCase):
