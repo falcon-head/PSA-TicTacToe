@@ -39,7 +39,7 @@ def choose_move_two(position, current_board_state, symbol):
             if value >= max_value:
                 max_value = value
                 choosen_move = p
-
+    print("choosen move: ", choosen_move)
     return str(choosen_move)
 
 
@@ -61,7 +61,6 @@ def choose_move(position, current_board_state, symbol):
             next_board = current_board_state.copy()
             next_board[p] = symbol
             next_board_state = get_latest_board_values(next_board)
-            print(next_board_state)
             value = 0 if position_value.get(next_board_state) is None else position_value.get(next_board_state)
             if value >= max_value:
                 max_value = value
@@ -83,7 +82,7 @@ def fetch():
     file.close()
 
     # Load the model of the file two
-    file = open('final_model_two', 'rb')
+    file = open('model_two', 'rb')
     position_value_two = pickle.load(file)
     file.close()
 

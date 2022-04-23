@@ -105,7 +105,7 @@ class TicTacToe:
         self.barGraphList.append(self.player_one_wins)
         self.barGraphList.append(self.player_two_wins)
         self.barGraphList.append(self.draws)
-        self.plot_bar_graph()
+        # self.plot_bar_graph()
 
     """
     Check for the available position in the board and append it to position
@@ -244,8 +244,8 @@ class TicTacToe:
         else:
             logging.info("Rewarded both player with 0.5")
             self.draws += 1
-            self.player_one.reward(0.1)
-            self.player_one.reward(0.5)
+            self.player_one.reward(0.2)
+            self.player_two.reward(0.5)
 
     """
         Reset the entire board state, symbol & the latest_board_state
@@ -271,7 +271,7 @@ class PlayerTraining:
         self.player_name = player_identifier
         self.position_state = []
         self.learning_rate = 0.2
-        self.discount_rate = 0.9
+        self.discount_rate = 0.8
         self.exploratory_move = 0.3  # make a random move to experience all the states present in the game
         self.greedy_move = 0.7 # To maximize the rewards
         self.position_value = {} # state position value dictionary
@@ -362,6 +362,7 @@ if __name__ == "__main__":
     ready_to_play = TicTacToe(player_one, player_two)
     logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(30000)
+    ready_to_play.play_game(300)
     # Save the model
     player_one.save_model()
+    player_two.save_model()
