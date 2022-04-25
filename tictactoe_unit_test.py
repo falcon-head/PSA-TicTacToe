@@ -60,7 +60,28 @@ class TestTicTacToe(unittest.TestCase):
         assert the_board.check_win() == 0
 
     # Unit testing using python mock functions
-    
+    def test_board_reset(self):
+        the_board = tictactoe_reinforcement.TicTacToe("player_one", "player_two")
+        the_board.board_reset()
+        assert the_board.game_has_ended == False
+        assert the_board.player_symbol == 1
+        assert the_board.latest_board_state == None
+
+    # Reset the board
+    def test_reset_state(self):
+        the_board = tictactoe_reinforcement.PlayerTraining("player_one")
+        the_board.reset_state()
+        assert the_board.position_state == []
+
+    # player symbol update
+    def test_update_board_state(self):
+        the_board = tictactoe_reinforcement.TicTacToe("player_one", "player_two")
+        the_board.player_symbol = 1
+        the_board.update_board_state(1)
+        assert the_board.player_symbol == -1
+        the_board.player_symbol = -1
+        the_board.update_board_state(1)
+        assert the_board.player_symbol == 1
 
 
 if __name__ == "__main__":

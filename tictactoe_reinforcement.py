@@ -303,6 +303,10 @@ class PlayerTraining:
         logging.info("Choosen move from the computer/ player one" + str(choosen_move))
         return choosen_move
 
+    """
+    Find the available positions on the board
+    """
+
     def available_position(self):
         # we need to store the availanle positon in the form of matrix
         # append the only position having the value 0 to the matrix, rest else is filled
@@ -317,7 +321,7 @@ class PlayerTraining:
     Get the latest board value
     """
     def get_latest_board_values(self, board):
-        latest_board = str(board.reshape(TOTAL_NUMBER_OF_COLUMNS * TOTAL_NUMBER_OF_ROWS))
+        latest_board = str(board.reshape(THE_BOARD))
         return latest_board
 
     """
