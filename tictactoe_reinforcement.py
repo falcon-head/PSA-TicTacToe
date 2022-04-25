@@ -362,7 +362,7 @@ if __name__ == "__main__":
     ready_to_play = TicTacToe(player_one, player_two)
     logging.info("The training has started")
     # Play the game
-    ready_to_play.play_game(300)
+    ready_to_play.play_game(1)
     # Save the model
-    player_one.save_model()
-    player_two.save_model()
+    # player_one.save_model()
+    # player_two.save_model()
