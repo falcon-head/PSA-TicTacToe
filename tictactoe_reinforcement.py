@@ -1,7 +1,7 @@
 """
 Author: Shrikrishna Joisa
 Creted on: 2022-06-04
-Last Updated on: 2022-12-04
+Last Updated on: 2022-27-04
 """
 
 import numpy as np
@@ -105,7 +105,7 @@ class TicTacToe:
         self.barGraphList.append(self.player_one_wins)
         self.barGraphList.append(self.player_two_wins)
         self.barGraphList.append(self.draws)
-        # self.plot_bar_graph()
+        self.plot_bar_graph()
 
     """
     Check for the available position in the board and append it to position
@@ -242,7 +242,9 @@ class TicTacToe:
             self.player_one.reward(0)
             self.player_two.reward(1)
         else:
-            logging.info("Rewarded both player with 0.5")
+            logging.info("Rewarded player one with 0.2")
+            logging.info("Rewarded player two with 0.5")
+            # rewarding player one with less reward than the player two because to make the player 2 more intelligent. (Basically maintaining fairness between two models)
             self.draws += 1
             self.player_one.reward(0.2)
             self.player_two.reward(0.5)
@@ -302,6 +304,7 @@ class PlayerTraining:
                     choosen_move = p
         logging.info("Choosen move from the computer/ player one" + str(choosen_move))
         return choosen_move
+
 
     """
     Find the available positions on the board
