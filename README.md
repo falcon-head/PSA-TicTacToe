@@ -13,7 +13,7 @@ TicTacToe game with the help of reinforcement learning model
 - In the command line type ``` export FLASK_APP=model-api ```
 - then ``` python3 -m flask run ```
 - the API will run on the port http://localhost:5000
-- Clone the repository [TICTACTOE-FRONTEND](https://github.com/coderbirju/PSA_Tic_Tac_Toe_FE)
+- Next, Clone the repository [TICTACTOE-FRONTEND](https://github.com/coderbirju/PSA_Tic_Tac_Toe_FE)
 - CD into the tictactoe folder
 - In the commandline type ```npm install``` (make sure you have already installed [Nodejs](https://nodejs.org/en/)
 - Once packages are installed, go to localhost:3000 in the browser to play the game
